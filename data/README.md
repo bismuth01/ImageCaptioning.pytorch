@@ -81,6 +81,46 @@ Then get `dataset_flickr30k.json` with the command
 ```bash
 wget -c https://github.com/Delphboy/karpathy-splits/raw/main/dataset_flickr32k.json\?download\= -O data/dataset_flickr30k.json
 ```
+For spliting data:
+
+Use script/combined_filckr30kJSON.py, this script organizes the Flickr30K dataset into train/, val/, and test/ folders based on the provided JSON split file.
+then copies image into correct directory:
+```bash
+dataset/
+ ├── train/
+ ├── val/
+ └── test/
+```
+If following direcotry structure:
+```bash
+~
+├── dataset_flickr30k.json           <-- JSON containing file names + splits
+├── Images/
+│   └── flickr30k_images/            <-- raw Flickr30K images
+└── IMAGECAPTIONING.pytorch/
+    └── scripts/
+        └── split_flickr30k.py       <-- this script
+
+```
+Go to:
+```bash
+cd ~/IMAGECAPTIONING.pytorch/scripts
+python split_flickr30k.py
+```
+For MANUAL RUN:
+```bash
+python split_flickr30k.py \
+  --json_file ~/dataset_flickr30k.json \
+  --source_images_dir ~/Images/flickr30k_images \
+  --output_base_dir ~/dataset
+```
+This script creates 
+```bash 
+~/dataset/
+ ├── train/
+ ├── val/
+ └── test/
+```
 
 Feature extraction is written below.
 
