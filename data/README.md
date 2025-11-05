@@ -11,7 +11,7 @@ Download preprocessed coco captions from [link](http://cs.stanford.edu/people/ka
 Then do:
 
 ```bash
-$ python scripts/prepro_labels.py --input_json data/dataset_coco.json --output_json data/cocotalk.json --output_h5 data/cocotalk
+python scripts/prepro_labels.py --input_json data/dataset_coco.json --output_json data/cocotalk.json --output_h5 data/cocotalk
 ```
 
 `prepro_labels.py` will map all words that occur <= 5 times to a special `UNK` token, and create a vocabulary for all the remaining words. The image information and vocabulary are dumped into `data/cocotalk.json` and discretized caption data are dumped into `data/cocotalk_label.h5`.
@@ -26,8 +26,8 @@ Download the coco images from [link](http://mscoco.org/dataset/#download). We ne
 
 Then:
 
-```
-$ python scripts/prepro_feats.py --input_json data/dataset_coco.json --output_dir data/cocotalk --images_root $IMAGE_ROOT
+```bash
+python scripts/prepro_feats.py --input_json data/dataset_coco.json --output_dir data/cocotalk --images_root $IMAGE_ROOT
 ```
 
 
@@ -47,7 +47,7 @@ To skip the preprocessing, you can download and decompress `cocotalk_att.tar` an
 Download pre-extracted features from [link](https://github.com/peteanderson80/bottom-up-attention). You can either download adaptive one or fixed one.
 
 For example:
-```
+```bash
 mkdir data/bu_data; cd data/bu_data
 wget https://imagecaption.blob.core.windows.net/imagecaption/trainval.zip
 unzip trainval.zip
@@ -76,22 +76,39 @@ Here is the link of the converted lmdb(More compressed than the original one pro
 ## Flickr30k.
 
 It's similar.
-
+Download images from [https://www.kaggle.com/datasets/hsankesara/flickr-image-dataset](https://www.kaggle.com/datasets/hsankesara/flickr-image-dataset)
+Then get `dataset_flickr30k.json` with the command
+```bash
+wget -c https://github.com/Delphboy/karpathy-splits/raw/main/dataset_flickr32k.json\?download\= -O data/dataset_flickr30k.json
 ```
-python scripts/prepro_labels.py --input_json data/dataset_flickr30k.json --output_json data/f30ktalk.json --output_h5 data/f30ktalk
 
+Feature extraction is written below.
+
+Preprocess labels using
+```bash
+python scripts/prepro_labels.py --input_json data/dataset_flickr30k.json --output_json data/f30ktalk.json --output_h5 data/f30ktalk
+```
+
+You can get ngrams for self critical with
+```bash
 python scripts/prepro_ngrams.py --input_json data/dataset_flickr30k.json --dict_json data/f30ktalk.json --output_pkl data/f30k-train --split train
 ```
 
 This is to generate the coco-like annotation file for evaluation using coco-caption.
-
-```
+```bash
 python scripts/prepro_reference_json.py --input_json data/dataset_flickr30k.json --output_json data/f30k_captions4eval.json
 ```
 
 ### Feature extraction
 
-For resnet feature, you can do the same thing as COCO.
+For resnet feature,
+Download pretrained resnet models. The models can be downloaded from [here](https://drive.google.com/open?id=0B7fNdx_jAqhtbVYzOURMdDNHSGM), and should be placed in `data/imagenet_weights`.
+
+You can also choose to name your train, test, val split directories, BUT IT IS RECOMMENDED TO KEEP IT THE SAME AS IN THE JSON SPLIT.
+Use `--images_root` argument to select the directory of images.
+```bash
+python scripts/prepro_labels.py --type f30k --input_json data/dataset_flickr30k.json --output_json data/f30ktalk.json --output_h5 data/f30ktalk
+```
 
 For bottom-up feature, you can download from [link](https://github.com/kuanghuei/SCAN)
 

@@ -38,7 +38,14 @@ preprocess = trn.Compose([
 from captioning.utils.resnet_utils import myResnet
 import captioning.utils.resnet as resnet
 
-
+def split_directory(params, split_type):
+    if split_type == "train":
+        return params["train_dir"]
+    if split_type == "test":
+        return params["test_dir"]
+    if split_type == "val":
+        return params["val_dir"]
+    
 def main(params):
     net = getattr(resnet, params['model'])()
     net.load_state_dict(torch.load(os.path.join(params['model_root'],params['model']+'.pth')))
@@ -59,9 +66,30 @@ def main(params):
     if not os.path.isdir(dir_att):
         os.mkdir(dir_att)
 
+    img_id_param = None
+    if params['type'] == 'f30k':
+        img_id_param = 'imgid'
+        val_dir = os.path.join(params['images_root'], params['val_dir'])
+        train_dir = os.path.join(params['images_root'], params['train_dir'])
+        test_dir = os.path.join(params['images_root'], params['test_dir'])
+        if not os.path.isdir(val_dir):
+            os.mkdir(val_dir)
+        if not os.path.isdir(train_dir):
+            os.mkdir(train_dir)
+        if not os.path.isdir(test_dir):
+            os.mkdir(test_dir)
+        
+    elif params['type'] == 'coco':
+        img_id_param = 'cocoid'
+    else:
+        raise Exception(f"Unknown dataset type: {params['type']}")
+
     for i,img in enumerate(imgs):
         # load the image
-        I = skimage.io.imread(os.path.join(params['images_root'], img['filepath'], img['filename']))
+        if params['type'] == 'coco':
+            I = skimage.io.imread(os.path.join(params['images_root'], img['filepath'], img['filename']))
+        elif params['type'] == 'f30k':
+            I = skimage.io.imread(os.path.join(params['images_root'], split_directory(params, img['split']), img['filename']))
         # handle grayscale input images
         if len(I.shape) == 2:
             I = I[:,:,np.newaxis]
@@ -73,8 +101,8 @@ def main(params):
         with torch.no_grad():
             tmp_fc, tmp_att = my_resnet(I, params['att_size'])
         # write to pkl
-        np.save(os.path.join(dir_fc, str(img['cocoid'])), tmp_fc.data.cpu().float().numpy())
-        np.savez_compressed(os.path.join(dir_att, str(img['cocoid'])), feat=tmp_att.data.cpu().float().numpy())
+        np.save(os.path.join(dir_fc, str(img[img_id_param])), tmp_fc.data.cpu().float().numpy())
+        np.savez_compressed(os.path.join(dir_att, str(img[img_id_param])), feat=tmp_att.data.cpu().float().numpy())
 
         if i % 1000 == 0:
             print('processing %d/%d (%.2f%% done)' % (i, N, i*100.0/N))
@@ -93,6 +121,10 @@ if __name__ == "__main__":
     parser.add_argument('--att_size', default=14, type=int, help='14x14 or 7x7')
     parser.add_argument('--model', default='resnet101', type=str, help='resnet101, resnet152')
     parser.add_argument('--model_root', default='./data/imagenet_weights', type=str, help='model root')
+    parser.add_argument('--type', default="coco", type=str, help='type of dataset (coco or f30k)')
+    parser.add_argument('--train_dir', default="train", type=str, help="Training directory if not specified in dataset json")
+    parser.add_argument('--val_dir', default="val", type=str, help="Validation directory if not specified in dataset json")
+    parser.add_argument('--test_dir', default="test", type=str, help="Testing directory if not specified in dataset json")
 
     args = parser.parse_args()
     params = vars(args) # convert to ordinary dict
