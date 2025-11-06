@@ -147,7 +147,7 @@ Download pretrained resnet models. The models can be downloaded from [here](http
 You can also choose to name your train, test, val split directories, BUT IT IS RECOMMENDED TO KEEP IT THE SAME AS IN THE JSON SPLIT.
 Use `--images_root` argument to select the directory of images.
 ```bash
-python scripts/prepro_labels.py --type f30k --input_json data/dataset_flickr30k.json --output_json data/f30ktalk.json --output_h5 data/f30ktalk
+python scripts/prepro_labels.py --type f30k --input_json data/dataset_flickr30k.json --output_dir data/f30ktalk --images_root ./data
 ```
 
 For bottom-up feature, you can download from [link](https://github.com/kuanghuei/SCAN)
