@@ -204,7 +204,11 @@ def eval_split(model, crit, loader, eval_kwargs={}):
         else:
             num_images = ix1
         for i in range(n - ix1):
-            predictions.pop()
+            if len(predictions) > 0:
+                predictions.pop()
+            else:
+                print('No more predictions in list')
+                break
 
         if verbose:
             print('evaluating validation preformance... %d/%d (%f)' %(n, ix1, loss))
